@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-APPNAME     = service-scaffold-golang
+APPNAME     = image-suggestions
 VERSION     = $(shell /usr/bin/git describe --always)
 BUILD_DATE  = $(shell date -u +%Y-%m-%dT%T:%Z)
 HOSTNAME    = $(shell hostname)
@@ -33,13 +33,21 @@ build:
 	@echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 	go build -ldflags "$(GO_LDFLAGS)" -o $(APPNAME) .
 
-run:
-	go run -ldflags "$(GO_LDFLAGS)" . -config $(CONFIG)
+check:
+	@if [ -n "`goimports -l *.go`" ]; then \
+	    echo "goimports: format errors detected" >&2; \
+	    false; \
+	fi
+	@if [ -n "`gofmt -l *.go`" ]; then \
+	    echo "gofmt: format errors detected" >&2; \
+	    false; \
+	fi
+	go vet ./...
 
-test:
+test: check
 	go test
 
 clean:
 	rm -f $(APPNAME)
 
-.PHONY: build run test clean
+.PHONY: build check test clean

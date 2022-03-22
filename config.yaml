@@ -13,10 +13,7 @@
 # limitations under the License.
 
 # The name of this service (as it appears in logs)
-service_name: scaffold-demo
-
-# A constant prepended to all URIs
-base_uri: /v0
+service_name: image-suggestions
 
 # The IP interface and port to bind the service to
 listen_address: localhost
@@ -24,3 +21,10 @@ listen_port: 8080
 
 # Log level, one of (in increasing severity): debug, info, warning, error and fatal
 log_level: debug
+
+# Cassandra database configuration
+cassandra:
+  port: 9042
+  consistency: one
+  hosts:
+    - localhost

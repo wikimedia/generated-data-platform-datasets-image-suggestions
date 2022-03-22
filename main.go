@@ -21,13 +21,15 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"path"
 	"runtime"
+	"strings"
 
-	log "github.com/eevans/servicelib-golang/logger"
-	"github.com/eevans/servicelib-golang/middleware"
+	log "gerrit.wikimedia.org/r/mediawiki/services/servicelib-golang/logger"
+	"github.com/gocql/gocql"
+	"github.com/julienschmidt/httprouter"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	http_gateway "gitlab.wikimedia.org/eevans/cassandra-http-gateway"
 )
 
 var (
@@ -56,7 +58,7 @@ var (
 	)
 	promBuildInfoGauge = prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Name:        "service_scaffold_golang_build_info",
+			Name:        "image_suggestions_build_info",
 			Help:        "Build information",
 			ConstLabels: map[string]string{"version": version, "build_date": buildDate, "build_host": buildHost, "go_version": runtime.Version()},
 		})
@@ -91,11 +93,56 @@ func main() {
 
 	logger.Info("Initializing service %s (Go version: %s, Build host: %s, Timestamp: %s", config.ServiceName, version, buildHost, buildDate)
 
-	// Wrap certain routes to collect metrics
-	echoHandlerWrapper := middleware.PrometheusInstrumentationMiddleware(reqCounter, durationHisto)(&EchoHandler{logger})
+	var cluster *gocql.ClusterConfig = gocql.NewCluster(config.Cassandra.Hosts...)
+	var session *gocql.Session
 
-	http.Handle("/healthz", &HealthzHandler{NewHealthz(version, buildDate, buildHost)})
-	http.Handle("/metrics", promhttp.Handler())
-	http.Handle(path.Join(config.BaseURI, "echo"), echoHandlerWrapper)
-	http.ListenAndServe(fmt.Sprintf("%s:%d", config.Address, config.Port), nil)
+	cluster.Consistency, _ = goCQLConsistency(config.Cassandra.Consistency)
+	cluster.Port = config.Cassandra.Port
+
+	logger.Info("Connecting to Cassandra database: %s (port %d)", strings.Join(config.Cassandra.Hosts, ","), config.Cassandra.Port)
+
+	if session, err = cluster.CreateSession(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+
+	router := httprouter.New()
+	builder := http_gateway.SelectBuilder.Logger(logger).Session(session).CounterVec(reqCounter).HistogramVec(durationHisto)
+
+	router.GET("/public/image_suggestions/suggestions/:wiki/:page_id", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		builder.
+			From("image_suggestions", "suggestions").
+			Bind(ps).
+			Build().
+			Handle(w, r)
+	})
+
+	router.GET("/private/image_suggestions/feedback/:wiki/:page_id", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		builder.
+			From("image_suggestions", "feedback").
+			Bind(ps).
+			Build().
+			Handle(w, r)
+	})
+
+	router.GET("/private/image_suggestions/title_cache/:wiki/:page_id", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		builder.
+			From("image_suggestions", "title_cache").
+			Bind(ps).
+			Build().
+			Handle(w, r)
+	})
+
+	router.GET("/private/image_suggestions/instanceof_cache/:wiki/:page_id", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		builder.
+			From("image_suggestions", "instanceof_cache").
+			Bind(ps).
+			Build().
+			Handle(w, r)
+	})
+
+	router.Handler("GET", "/healthz", &HealthzHandler{NewHealthz(version, buildDate, buildHost)})
+	router.Handler("GET", "/metrics", promhttp.Handler())
+
+	http.ListenAndServe(fmt.Sprintf("%s:%d", config.Address, config.Port), router)
 }
