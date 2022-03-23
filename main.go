@@ -91,7 +91,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	logger.Info("Initializing service %s (Go version: %s, Build host: %s, Timestamp: %s", config.ServiceName, version, buildHost, buildDate)
+	logger.Info(
+		"Initializing service %s (Version: %s, Go: %s, Build host: %s, Timestamp: %s",
+		config.ServiceName,
+		version,
+		runtime.Version(),
+		buildHost,
+		buildDate,
+	)
 
 	var cluster *gocql.ClusterConfig = gocql.NewCluster(config.Cassandra.Hosts...)
 	var session *gocql.Session
