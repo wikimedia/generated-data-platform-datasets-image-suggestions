@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Nikki Nikkhoui <nnikkhoui@wikimedia.org> and Wikimedia Foundation
+ * Copyright 2022 Eric Evans <eevans@wikimedia.org> and Wikimedia Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	http_gateway "gitlab.wikimedia.org/eevans/cassandra-http-gateway"
+	http_gateway "gitlab.wikimedia.org/repos/generated-data-platform/cassandra-http-gateway"
 )
 
 var (
@@ -84,9 +84,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	logger, err = log.NewLogger(os.Stdout, config.ServiceName, config.LogLevel)
-
-	if err != nil {
+	if logger, err = log.NewLogger(os.Stdout, config.ServiceName, config.LogLevel); err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to initialize the logger: %s", err)
 		os.Exit(1)
 	}
