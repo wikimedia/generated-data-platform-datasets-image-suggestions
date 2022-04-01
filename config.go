@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Nikki Nikkhoui <nnikkhoui@wikimedia.org>, Eric Evans <eevans@wikimedia.org>,
+ * Copyright 2022 Nikki Nikkhoui <nnikkhoui@wikimedia.org>, Eric Evans <eevans@wikimedia.org>,
  * and Wikimedia Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +22,6 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/gocql/gocql"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -40,6 +39,7 @@ type cassandra struct {
 	Port        int      `yaml:"port"`
 	Consistency string   `yaml:"consistency"`
 	Hosts       []string `yaml:"hosts"`
+	LocalDC     string   `yaml:"local_dc"`
 }
 
 // NewConfig returns a new Config from YAML serialized as bytes.
@@ -109,29 +109,4 @@ func validate(config *Config) (*Config, error) {
 	}
 
 	return config, nil
-}
-
-func goCQLConsistency(c string) (gocql.Consistency, error) {
-	switch strings.ToLower(c) {
-	case "any":
-		return gocql.Any, nil
-	case "one":
-		return gocql.One, nil
-	case "two":
-		return gocql.Two, nil
-	case "three":
-		return gocql.Three, nil
-	case "quorum":
-		return gocql.Quorum, nil
-	case "all":
-		return gocql.All, nil
-	case "localquorum":
-		return gocql.LocalQuorum, nil
-	case "eachquorum":
-		return gocql.EachQuorum, nil
-	case "localone":
-		return gocql.LocalOne, nil
-	default:
-		return 0, fmt.Errorf("Unrecognized Cassandra consistency level")
-	}
 }

@@ -1,4 +1,4 @@
-# Copyright 2021 Nikki Nikkhoui <nnikkhoui@wikimedia.org> and Wikimedia Foundation
+# Copyright 2022 Eric Evans <eevans@wikimedia.org> and Wikimedia Foundation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,3 +28,9 @@ cassandra:
   consistency: one
   hosts:
     - localhost
+  local_dc: datacenter1
+  # authentication:
+  #   username: eevans
+  #   password: qwerty
+  # tls:
+  #   ca: /tmp/ca/rootCa.crt

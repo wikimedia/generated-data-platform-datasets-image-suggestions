@@ -98,15 +98,11 @@ func main() {
 		buildDate,
 	)
 
-	var cluster *gocql.ClusterConfig = gocql.NewCluster(config.Cassandra.Hosts...)
 	var session *gocql.Session
-
-	cluster.Consistency, _ = goCQLConsistency(config.Cassandra.Consistency)
-	cluster.Port = config.Cassandra.Port
 
 	logger.Info("Connecting to Cassandra database: %s (port %d)", strings.Join(config.Cassandra.Hosts, ","), config.Cassandra.Port)
 
-	if session, err = cluster.CreateSession(); err != nil {
+	if session, err = newCassandraSession(config); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
