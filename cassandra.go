@@ -36,6 +36,27 @@ func newCassandraSession(config *Config) (*gocql.Session, error) {
 		cluster.PoolConfig.HostSelectionPolicy = gocql.RoundRobinHostPolicy()
 	}
 
+	// TLS
+	tlsConf := config.Cassandra.TLS
+
+	if tlsConf.CaPath != "" {
+		cluster.SslOpts = &gocql.SslOptions{
+			CaPath: tlsConf.CaPath,
+		}
+		cluster.SslOpts.CertPath = tlsConf.CertPath
+		cluster.SslOpts.KeyPath = tlsConf.KeyPath
+	}
+
+	// Authentication
+	authConf := config.Cassandra.Authentication
+
+	if authConf.Username != "" {
+		cluster.Authenticator = gocql.PasswordAuthenticator{
+			Username: authConf.Username,
+			Password: authConf.Password,
+		}
+	}
+
 	return cluster.CreateSession()
 }
 

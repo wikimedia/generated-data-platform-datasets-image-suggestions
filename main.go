@@ -98,11 +98,14 @@ func main() {
 		buildDate,
 	)
 
+	logger.Info("Connecting to Cassandra database: %s (port %d)", strings.Join(config.Cassandra.Hosts, ","), config.Cassandra.Port)
+	logger.Debug("Cassandra: configured for consistency level '%s'", strings.ToLower(config.Cassandra.Consistency))
+	logger.Debug("Cassandra: configured for local datacenter '%s'", config.Cassandra.LocalDC)
+
 	var session *gocql.Session
 
-	logger.Info("Connecting to Cassandra database: %s (port %d)", strings.Join(config.Cassandra.Hosts, ","), config.Cassandra.Port)
-
 	if session, err = newCassandraSession(config); err != nil {
+		logger.Error("Failed to create Cassandra session: %s", err)
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

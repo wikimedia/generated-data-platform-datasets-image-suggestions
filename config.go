@@ -40,6 +40,16 @@ type cassandra struct {
 	Consistency string   `yaml:"consistency"`
 	Hosts       []string `yaml:"hosts"`
 	LocalDC     string   `yaml:"local_dc"`
+
+	TLS struct {
+		CaPath   string `yaml:"ca"`
+		CertPath string `yaml:"cert"`
+		KeyPath  string `yaml:"key"`
+	}
+	Authentication struct {
+		Username string `yaml:"username"`
+		Password string `yaml:"password"`
+	}
 }
 
 // NewConfig returns a new Config from YAML serialized as bytes.
