@@ -1,0 +1,27 @@
+version: v4
+base: docker-registry.wikimedia.org/wikimedia-buster:latest
+
+variants:
+  build:
+    base: docker-registry.wikimedia.org/golang1.17:latest
+    apt:
+      packages:
+        - git
+    copies: [local]
+    builder:
+      command:
+        - "go"
+        - "install"
+        - "golang.org/x/tools/cmd/goimports@latest"
+    runs:
+      insecurely: true
+  check:
+    includes: [build]
+    entrypoint: [make, check]
+  prep:
+    includes: [build]
+    builder:
+      command: [make, build]
+      requirements: [.]
+  production:
+    copies: [prep]
