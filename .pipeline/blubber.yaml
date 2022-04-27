@@ -18,6 +18,9 @@ variants:
   check:
     includes: [build]
     entrypoint: [make, check]
+  test:
+    includes: [check]
+    entrypoint: [make, test]
   prep:
     includes: [build]
     builder:
