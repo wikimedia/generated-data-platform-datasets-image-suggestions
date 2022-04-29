@@ -147,6 +147,7 @@ func main() {
 
 	router.Handler("GET", "/healthz", &HealthzHandler{NewHealthz(version, buildDate, buildHost)})
 	router.Handler("GET", "/metrics", promhttp.Handler())
+	router.HandlerFunc("GET", "/openapi", openAPIHandlerFunc)
 
 	http.ListenAndServe(fmt.Sprintf("%s:%d", config.Address, config.Port), router)
 }
