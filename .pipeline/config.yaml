@@ -2,7 +2,7 @@ pipelines:
   test:
     blubberfile: blubber.yaml
     stages:
-      - name: check
+      - name: test
       - name: candidate
         build: production
 
