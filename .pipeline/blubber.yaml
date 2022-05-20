@@ -7,7 +7,6 @@ variants:
     apt:
       packages:
         - git
-        - wmf-certificates
     copies: [local]
     builder:
       command:
@@ -28,4 +27,7 @@ variants:
       command: [make, build]
       requirements: [.]
   production:
+    apt:
+      packages:
+        - wmf-certificates
     copies: [prep]
