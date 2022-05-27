@@ -89,6 +89,9 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Allow overriding config using environment variables
+	MergeEnvironment(config, logger)
+
 	logger.Info(
 		"Initializing service %s (Version: %s, Go: %s, Build host: %s, Timestamp: %s",
 		config.ServiceName,

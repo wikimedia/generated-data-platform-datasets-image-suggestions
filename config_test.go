@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 
+	log "gerrit.wikimedia.org/r/mediawiki/services/servicelib-golang/logger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -125,4 +127,38 @@ func TestValidLogLevels(t *testing.T) {
 func TestBogusLogLevel(t *testing.T) {
 	_, err := NewConfig([]byte("log_level: unreal"))
 	require.Error(t, err)
+}
+
+func TestMergeEnvironment(t *testing.T) {
+	config, err := NewConfig([]byte("cassandra: {authentication: {username: eevans, password: qwerty}}"))
+	require.NoError(t, err)
+
+	logger, err := log.NewLogger(os.Stdout, config.ServiceName, config.LogLevel)
+	require.NoError(t, err)
+
+	// Verify starting values...
+	require.Equal(t, "eevans", config.Cassandra.Authentication.Username)
+	require.Equal(t, "qwerty", config.Cassandra.Authentication.Password)
+
+	// Username w/o password should default to the config values
+	os.Setenv("CASSANDRA_USERNAME", "newuser")
+	MergeEnvironment(config, logger)
+
+	require.Equal(t, "eevans", config.Cassandra.Authentication.Username)
+	require.Equal(t, "qwerty", config.Cassandra.Authentication.Password)
+
+	// Password w/o username should default to the config values
+	os.Unsetenv("CASSANDRA_USERNAME")
+	os.Setenv("CASSANDRA_PASSWORD", "newpass")
+	MergeEnvironment(config, logger)
+
+	require.Equal(t, "eevans", config.Cassandra.Authentication.Username)
+	require.Equal(t, "qwerty", config.Cassandra.Authentication.Password)
+
+	// Username & password in environment should override config values
+	os.Setenv("CASSANDRA_USERNAME", "newuser")
+	MergeEnvironment(config, logger)
+
+	assert.Equal(t, "newuser", config.Cassandra.Authentication.Username)
+	assert.Equal(t, "newpass", config.Cassandra.Authentication.Password)
 }

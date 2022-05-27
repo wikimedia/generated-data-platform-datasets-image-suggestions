@@ -29,6 +29,8 @@ cassandra:
   hosts:
     - localhost
   local_dc: datacenter1
+  # Cassandra authentication credentials (username & password) can be overriden by
+  # by setting CASSANDRA_USERNAME and CASSANDRA_PASSWORD in the environment.
   # authentication:
   #   username: eevans
   #   password: qwerty
