@@ -19,14 +19,14 @@ CREATE TABLE IF NOT EXISTS image_suggestions.suggestions (
 CREATE TABLE IF NOT EXISTS image_suggestions.feedback(
     wiki          text,       -- Corresponds to suggestions.wiki
     page_id       int,        -- Corresponds to suggestions.page_id
-    image         text,       -- Corresponds to suggestions.image
+    filename      text,       -- Corresponds to suggestions.image
     id            timeuuid,   -- ID (& timestamp) of feedback
     origin_wiki   text,       -- Corresponds to suggestions.origin_wiki
-    user          text,       -- User who submitted feedback
-    accepted      boolean,    -- True if feedback indicates acceptance
-    rejected      boolean,    -- True if feedback indicates rejection
-    comment       text,       -- User-submitted comment for a rejection
-    PRIMARY KEY((wiki, page_id), image, id)
+    user_id       int,        -- User who submitted feedback
+    is_accepted   boolean,    -- True if feedback indicates acceptance
+    is_rejected   boolean,    -- True if feedback indicates rejection
+    rejection_reason  text,   -- User-submitted comment for a rejection
+    PRIMARY KEY((wiki, page_id), filename, id)
 );
 
 -- Page ID/page title mapping.
