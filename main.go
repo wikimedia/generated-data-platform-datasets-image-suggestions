@@ -132,7 +132,7 @@ func main() {
 			Handle(w, r)
 	})
 
-	router.GET("/private/image_suggestions/title_cache/:wiki/:page_id", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	router.GET("/private/image_suggestions/title_cache/:wiki/:title", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		builder.
 			From("image_suggestions", "title_cache").
 			Bind(ps).
