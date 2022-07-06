@@ -19,7 +19,8 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
+	"path/filepath"
 	"strings"
 
 	yaml "gopkg.in/yaml.v2"
@@ -77,7 +78,7 @@ func NewConfig(data []byte) (*Config, error) {
 
 // Returns a new Config from a YAML file.
 func ReadConfig(filename string) (*Config, error) {
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filepath.Clean(filename))
 	if err != nil {
 		return nil, err
 	}

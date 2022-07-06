@@ -16,7 +16,11 @@
 
 package main
 
-import "net/http"
+import (
+	"net/http"
+
+	log "gerrit.wikimedia.org/r/mediawiki/services/servicelib-golang/logger"
+)
 
 const openapi = `
 openapi: 3.0.2
@@ -70,7 +74,11 @@ components:
           type: string
 `
 
-func openAPIHandlerFunc(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/x-yaml")
-	w.Write([]byte(openapi))
+func openAPIHandler(logger *log.Logger) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/x-yaml")
+		if _, err := w.Write([]byte(openapi)); err != nil {
+			logger.Error("Problem writing OpenAPI specification: %v", err)
+		}
+	})
 }

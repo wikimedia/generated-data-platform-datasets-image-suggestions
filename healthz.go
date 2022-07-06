@@ -20,6 +20,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"runtime"
+
+	log "gerrit.wikimedia.org/r/mediawiki/services/servicelib-golang/logger"
 )
 
 // Healthz represents the JSON object sent in the body of a `/healthz` response.
@@ -43,6 +45,7 @@ func NewHealthz(version, date, host string) *Healthz {
 // HealthzHandler is an http.Handler that implements a readiness endpoint.
 type HealthzHandler struct {
 	healthz *Healthz
+	logger  *log.Logger
 }
 
 // Serves Healthz struct data as JSON
@@ -53,9 +56,18 @@ func (s *HealthzHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
+	// Marshal Healthz struct to JSON
 	if response, err = json.MarshalIndent(s.healthz, "", "  "); err != nil {
-		w.Write([]byte(`{}`))
+		s.logger.Error("Failed to serialize healthz object to JSON (%v); This is a bug!", err)
+
+		// We still want to pass "readiness", even if JSON serialization fails
+		if _, err = w.Write([]byte(`{}`)); err != nil {
+			s.logger.Error("Unable to write HTTP response: %v", err)
+		}
 		return
 	}
-	w.Write(response)
+
+	if _, err = w.Write(response); err != nil {
+		s.logger.Error("Unable to write HTTP (healthz) response: %v", err)
+	}
 }

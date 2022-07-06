@@ -19,9 +19,11 @@ package main
 import (
 	"flag"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"runtime"
+	"strconv"
 	"strings"
 
 	log "gerrit.wikimedia.org/r/mediawiki/services/servicelib-golang/logger"
@@ -148,9 +150,9 @@ func main() {
 			Handle(w, r)
 	})
 
-	router.Handler("GET", "/healthz", &HealthzHandler{NewHealthz(version, buildDate, buildHost)})
+	router.Handler("GET", "/healthz", &HealthzHandler{NewHealthz(version, buildDate, buildHost), logger})
 	router.Handler("GET", "/metrics", promhttp.Handler())
-	router.HandlerFunc("GET", "/openapi", openAPIHandlerFunc)
+	router.Handler("GET", "/openapi", openAPIHandler(logger))
 
-	http.ListenAndServe(fmt.Sprintf("%s:%d", config.Address, config.Port), router)
+	logger.Fatal("%v", http.ListenAndServe(net.JoinHostPort(config.Address, strconv.Itoa(config.Port)), router))
 }
