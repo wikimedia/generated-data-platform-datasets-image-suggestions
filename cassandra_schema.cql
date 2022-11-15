@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS image_suggestions.feedback(
     user_id       int,        -- User who submitted feedback
     is_accepted   boolean,    -- True if feedback indicates acceptance
     is_rejected   boolean,    -- True if feedback indicates rejection
-    rejection_reason  text,   -- User-submitted comment for a rejection
+    rejection_reasons set<text>,   -- User-submitted comment for a rejection
     PRIMARY KEY((wiki, page_id), filename, id)
 );
 
