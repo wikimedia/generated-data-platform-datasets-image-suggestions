@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS image_suggestions.suggestions (
     found_on      set<text>,  -- Other wikis that use the image
     kind          set<text>,  -- ??
     page_rev      int,        -- Revision of page_id at time of recommendation (informational)
+    section_heading text,     -- Section heading identifier
     PRIMARY KEY((wiki, page_id), id, image)
 );
 
