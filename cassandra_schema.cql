@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS image_suggestions.suggestions (
     kind          set<text>,  -- ??
     page_rev      int,        -- Revision of page_id at time of recommendation (informational)
     section_heading text,     -- Section heading identifier
+    section_index int,        -- Section heading index
+    page_qid      text,       -- Wikidata page item
     PRIMARY KEY((wiki, page_id), id, image)
 );
 
