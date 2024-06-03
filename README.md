@@ -8,7 +8,7 @@ Provides read-only Image Suggestions access (via the [cassandra-http-gateway] fr
 
 Building requires:
 
-- Go (>= 1.15)
+- Go (>= 1.19)
 - Make
 
 ```sh-session
